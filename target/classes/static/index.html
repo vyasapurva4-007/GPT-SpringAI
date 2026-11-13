@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Apurva GPT</title>
+    <style>
+        :root { --bg:#f6f7f9; --card:#fff; --text:#1c2430; --muted:#6b7686; --line:#d5dae1; --accent:#1f5fbf; }
+        @media (prefers-color-scheme: dark) {
+            :root { --bg:#14181f; --card:#1c222b; --text:#e6eaf0; --muted:#97a1b0; --line:#323b48; --accent:#5b9bff; }
+        }
+        * { box-sizing: border-box; }
+        body { margin:0; background:var(--bg); color:var(--text);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+        main { max-width: 720px; margin: 48px auto; padding: 0 20px; }
+        h1 { font-size: 1.5rem; margin: 0 0 24px; }
+        label { display:block; font-size:.9rem; color:var(--muted); margin: 16px 0 6px; }
+        textarea { width:100%; min-height:140px; padding:12px; font:inherit; color:var(--text);
+            background:var(--card); border:1px solid var(--line); border-radius:6px; resize:vertical; }
+        textarea:focus-visible, button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+        button { margin-top:16px; padding:10px 22px; font:inherit; font-weight:600; color:#fff;
+            background:var(--accent); border:0; border-radius:6px; cursor:pointer; }
+        button:disabled { opacity:.6; cursor:wait; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Apurva GPT</h1>
+
+    <label for="input">Input</label>
+    <textarea id="input" placeholder="Type your text here"></textarea>
+
+    <button id="submit">Submit</button>
+
+    <label for="output">Output</label>
+    <textarea id="output" readonly></textarea>
+</main>
+
+<script>
+    const input = document.getElementById('input');
+    const output = document.getElementById('output');
+    const button = document.getElementById('submit');
+
+    button.addEventListener('click', async () => {
+        const text = input.value.trim();
+        if (!text) {
+            output.value = 'Please type something first.';
+            return;
+        }
+
+        button.disabled = true;
+        output.value = 'Thinking...';
+
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+            if (!res.ok) throw new Error('Server returned ' + res.status);
+            const data = await res.json();
+            output.value = data.output;
+        } catch (e) {
+            output.value = 'Request failed: ' + e.message;
+        } finally {
+            button.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
